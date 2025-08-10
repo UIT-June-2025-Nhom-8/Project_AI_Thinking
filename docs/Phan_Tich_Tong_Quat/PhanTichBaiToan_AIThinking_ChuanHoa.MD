@@ -37,22 +37,25 @@ Trong môi trường giáo dục hiện đại, việc thu thập và phân tíc
 #### 4.1 Tổng quan kiến trúc cho bài toán phân tích văn bản đa nhiệm
 ```mermaid
 flowchart TD
-    A[Dữ liệu văn bản đầu vào] --> B[Tiền xử lý văn bản]
-    B --> C[Trích xuất đặc trưng]
+    A[Dữ liệu đầu vào] --> B[Tiền xử lý]
+    B --> C[Trích xuất<br/>đặc trưng]
     
-    C --> D[Nhánh 1: Phân loại có giám sát<br/>Phát hiện khía cạnh & Cảm xúc]
-    C --> E[Nhánh 2: Phân tích không giám sát<br/>Khám phá chủ đề]
+    C --> D[Nhánh 1:<br/>Phân loại giám sát]
+    C --> E[Nhánh 2:<br/>Phân tích không giám sát]
     
-    D --> F[Mô hình phân loại<br/>Phân loại đa nhãn]
-    E --> G[Mô hình khám phá<br/>Học không giám sát]
+    D --> D1[Phát hiện<br/>khía cạnh]
+    D --> D2[Phân tích<br/>cảm xúc]
+    E --> G[Khám phá<br/>chủ đề]
     
-    F --> H[Kết quả có nhãn<br/>Khía cạnh + Cảm xúc]
-    G --> I[Kết quả không nhãn<br/>Chủ đề + Từ khóa]
+    D1 --> H[Kết quả khía cạnh]
+    D2 --> H1[Kết quả cảm xúc]
+    G --> I[Kết quả chủ đề]
     
-    H --> J[Tích hợp và Kết hợp]
+    H --> J[Tích hợp kết quả]
+    H1 --> J
     I --> J
     
-    J --> K[Bảng điều khiển phân tích tổng hợp]
+    J --> K[Dashboard<br/>phân tích]
     
     style A fill:#e1f5fe
     style B fill:#f3e5f5
@@ -102,23 +105,25 @@ flowchart TD
 
 ```mermaid
 graph TD
-    subgraph "Ma trận quyết định"
-        A[Yêu cầu hiệu suất] --> D{Cần độ chính xác cao?}
-        B[Ràng buộc tài nguyên] --> E{Tính toán hạn chế?}
-        C[Nhu cầu diễn giải] --> F{Khả năng giải thích quan trọng?}
-        
-        D -->|Có| G[PhoBERT + Dựa trên BERT]
-        D -->|Không| H[ML truyền thống]
-        
-        E -->|Có| I[Mô hình nhẹ]
-        E -->|Không| J[Deep Learning chấp nhận được]
-        
-        F -->|Có| K[LDA + Hồi quy Logistic]
-        F -->|Không| L[Mô hình hộp đen chấp nhận được]
+    subgraph "Yêu cầu hệ thống"
+        A[Hiệu suất] --> D{Độ chính xác<br/>cao?}
+        B[Tài nguyên] --> E{Hạn chế<br/>tính toán?}
+        C[Diễn giải] --> F{Cần giải thích<br/>rõ ràng?}
     end
     
-    subgraph "Kiến trúc cuối cùng"
-        M[PhoBERT cho Cảm xúc<br/>BERT cho Phát hiện Khía cạnh<br/>LDA cho Chủ đề]
+    subgraph "Lựa chọn công nghệ"
+        D -->|Có| G[PhoBERT +<br/>BERT]
+        D -->|Không| H[ML cơ bản]
+        
+        E -->|Có| I[Mô hình nhẹ]
+        E -->|Không| J[Deep Learning]
+        
+        F -->|Có| K[LDA +<br/>Logistic]
+        F -->|Không| L[Mô hình phức tạp]
+    end
+    
+    subgraph "Kiến trúc cuối"
+        M[PhoBERT: Cảm xúc<br/>BERT: Khía cạnh<br/>LDA: Chủ đề]
     end
     
     G --> M
@@ -140,26 +145,26 @@ graph TD
 #### 4.4 Pipeline xử lý tích hợp
 ```mermaid
 flowchart LR
-    A[Đầu vào văn bản thô] --> B[Tiền xử lý văn bản<br/>Chuẩn hóa, Làm sạch, Tách từ]
+    A[Văn bản đầu vào] --> B[Tiền xử lý<br/>Chuẩn hóa & Làm sạch]
     
-    B --> C[Trích xuất đặc trưng<br/>Embedding PhoBERT]
+    B --> C[Đặc trưng<br/>PhoBERT Embedding]
     
     C --> D[Đầu đa nhiệm]
     
-    D --> E[Phát hiện khía cạnh<br/>Nhị phân đa nhãn]
-    D --> F[Phân loại cảm xúc<br/>Cảm xúc theo khía cạnh]
+    D --> E[Phát hiện<br/>khía cạnh]
+    D --> F[Phân loại<br/>cảm xúc]
     
-    C --> G[Mô hình hóa chủ đề<br/>Xử lý LDA]
+    C --> G[Mô hình hóa<br/>chủ đề LDA]
     
-    E --> H[Kết quả khía cạnh<br/>giảng_viên, nội_dung, phương_pháp...]
-    F --> I[Kết quả cảm xúc<br/>tích_cực, trung_tính, tiêu_cực theo khía cạnh]
-    G --> J[Kết quả chủ đề<br/>Phân phối chủ đề + từ khóa]
+    E --> H[Khía cạnh:<br/>GV, NĐ, PP...]
+    F --> I[Cảm xúc:<br/>+, 0, - theo khía cạnh]
+    G --> J[Chủ đề:<br/>Phân phối + từ khóa]
     
-    H --> K[Tích hợp kết quả<br/>Ánh xạ Khía cạnh-Cảm xúc-Chủ đề]
+    H --> K[Tích hợp<br/>Ánh xạ kết quả]
     I --> K
     J --> K
     
-    K --> L[Đầu ra thống nhất<br/>Phân tích đa chiều]
+    K --> L[Phân tích<br/>đa chiều]
     
     style A fill:#e3f2fd
     style C fill:#f3e5f5
@@ -183,31 +188,31 @@ flowchart LR
 #### 5.1 Hiệu suất phát hiện khía cạnh
 ```mermaid
 graph TD
-    subgraph "Đánh giá đa chiều"
-        A[Phát hiện khía cạnh] --> B[Precision theo khía cạnh]
-        A --> C[Recall theo khía cạnh]
-        A --> D[F1-Score theo khía cạnh]
+    subgraph "Đánh giá khía cạnh"
+        A[Phát hiện<br/>khía cạnh] --> B[Precision<br/>theo khía cạnh]
+        A --> C[Recall<br/>theo khía cạnh]
+        A --> D[F1-Score<br/>theo khía cạnh]
         
-        B --> E[Macro-F1 trên các khía cạnh]
+        B --> E[Macro-F1<br/>tổng hợp]
         C --> E
         D --> E
         
-        E --> F[Hiệu suất hệ thống tổng thể]
+        E --> F[Hiệu suất<br/>hệ thống]
     end
     
-    subgraph "Tích hợp khía cạnh-cảm xúc"
-        G[Đánh giá chung] --> H[Độ chính xác khớp hoàn toàn]
-        G --> I[Chấm điểm từng phần]
-        G --> J[F1 cảm xúc theo khía cạnh]
+    subgraph "Tích hợp cảm xúc"
+        G[Đánh giá chung] --> H[Độ chính xác<br/>khớp hoàn toàn]
+        G --> I[Chấm điểm<br/>từng phần]
+        G --> J[F1 cảm xúc<br/>theo khía cạnh]
     end
     
-    subgraph "Độ nhất quán chủ đề-khía cạnh"
-        K[Chất lượng chủ đề] --> N[Điểm độ nhất quán]
-        L[Sự liên kết khía cạnh] --> N
-        M[Tính liên quan lĩnh vực] --> N
+    subgraph "Nhất quán chủ đề"
+        K[Chất lượng<br/>chủ đề] --> N[Điểm<br/>độ nhất quán]
+        L[Liên kết<br/>khía cạnh] --> N
+        M[Liên quan<br/>lĩnh vực] --> N
     end
     
-    F --> O[Điểm hiệu suất thống nhất]
+    F --> O[Điểm hiệu suất<br/>thống nhất]
     J --> O
     N --> O
     
@@ -237,27 +242,27 @@ graph TD
 #### 6.1 Khung tối ưu hóa siêu tham số
 ```mermaid
 graph TD
-    subgraph "Mục tiêu tối ưu hóa"
-        A[Phát hiện khía cạnh] --> D[Tìm kiếm lưới<br/>Tỷ lệ học, Dropout]
-        B[Phân loại cảm xúc] --> E[Tối ưu Bayes<br/>Kiến trúc, Chính quy hóa]
-        C[Mô hình hóa chủ đề] --> F[Tìm kiếm dựa độ nhất quán<br/>K chủ đề, Alpha, Beta]
+    subgraph "Mục tiêu tối ưu"
+        A[Phát hiện<br/>khía cạnh] --> D[Tìm kiếm lưới<br/>Learning rate, Dropout]
+        B[Phân loại<br/>cảm xúc] --> E[Tối ưu Bayes<br/>Kiến trúc, Regularization]
+        C[Mô hình hóa<br/>chủ đề] --> F[Tìm kiếm coherence<br/>K topics, Alpha, Beta]
     end
     
-    subgraph "Tối ưu hóa chung"
-        D --> G[Tối ưu hóa đa mục tiêu]
+    subgraph "Tối ưu chung"
+        D --> G[Tối ưu hóa<br/>đa mục tiêu]
         E --> G
         F --> G
-        G --> H[Giải pháp tối ưu Pareto]
+        G --> H[Giải pháp<br/>Pareto tối ưu]
     end
     
-    subgraph "Chiến lược xác thực"
-        I[Kiểm định chéo] --> J[Chia tách thời gian]
-        J --> K[Ổn định hiệu suất]
-        K --> L[Lựa chọn mô hình cuối cùng]
+    subgraph "Xác thực"
+        I[Cross<br/>Validation] --> J[Time-based<br/>Split]
+        J --> K[Stability<br/>Check]
+        K --> L[Model<br/>Selection]
     end
     
     H --> I
-    L --> M[Mô hình sản xuất]
+    L --> M[Production<br/>Model]
     
     style G fill:#f3e5f5
     style H fill:#e8f5e8
@@ -270,6 +275,78 @@ graph TD
 - **Dừng sớm**: Ngăn chặn hiện tượng quá khớp với giám sát dựa trên độ kiên nhẫn
 - **Phương pháp tổng hợp**: Kết hợp nhiều biến thể mô hình để dự đoán chắc chắn
 
+#### 6.2 Giải pháp Pareto tối ưu trong ABSA đa mục tiêu
+
+**Khái niệm Pareto Front trong ABSA:**
+Trong hệ thống ABSA, chúng ta cần tối ưu hóa đồng thời nhiều mục tiêu xung đột:
+
+| **Mục tiêu** | **Ký hiệu** | **Mô tả** | **Xung đột với** |
+|-------------|------------|-----------|------------------|
+| **Độ chính xác khía cạnh** | f₁(x) | F1-score phát hiện khía cạnh | Tốc độ, Diễn giải |
+| **Độ chính xác cảm xúc** | f₂(x) | F1-score phân loại cảm xúc | Tốc độ, Tài nguyên |
+| **Chất lượng chủ đề** | f₃(x) | Coherence score LDA | Độ phức tạp |
+| **Hiệu quả tính toán** | f₄(x) | Thời gian inference | Độ chính xác |
+| **Khả năng diễn giải** | f₅(x) | Interpretability score | Độ chính xác |
+
+**Hàm mục tiêu tổng hợp:**
+```
+Maximize: F(x) = [f₁(x), f₂(x), f₃(x), f₄(x), f₅(x)]
+Subject to: Ràng buộc tài nguyên và hiệu suất
+```
+
+**Các điểm Pareto tiêu biểu:**
+
+```mermaid
+graph LR
+    subgraph "Pareto Front ABSA"
+        P1[P1: Độ chính xác cao<br/>f1=0.89, f2=0.87<br/>Tốc độ thấp]
+        P2[P2: Cân bằng<br/>f1=0.83, f2=0.84<br/>Tốc độ TB]
+        P3[P3: Hiệu quả cao<br/>f1=0.78, f2=0.80<br/>Tốc độ cao]
+        P4[P4: Diễn giải cao<br/>f1=0.75, f2=0.82<br/>Dễ hiểu]
+    end
+    
+    subgraph "Ứng dụng thực tế"
+        A1[Nghiên cứu<br/>học thuật] --> P1
+        A2[Sản phẩm<br/>thương mại] --> P2
+        A3[Ứng dụng<br/>thời gian thực] --> P3
+        A4[Báo cáo<br/>quản lý] --> P4
+    end
+    
+    style P1 fill:#ffcdd2
+    style P2 fill:#c8e6c9
+    style P3 fill:#fff3e0
+    style P4 fill:#e3f2fd
+```
+
+**Thuật toán tìm Pareto Front:**
+
+1. **NSGA-II (Non-dominated Sorting Genetic Algorithm)**:
+   ```python
+   # Pseudo-code cho ABSA Pareto optimization
+   population = initialize_hyperparameters()
+   for generation in range(max_generations):
+       # Đánh giá đa mục tiêu
+       objectives = evaluate_multi_objective(population)
+       # Sắp xếp không bị chi phối
+       fronts = non_dominated_sorting(objectives)
+       # Lựa chọn và lai ghép
+       population = selection_crossover_mutation(fronts)
+   return pareto_front
+   ```
+
+2. **MOEA/D (Multi-Objective Evolutionary Algorithm)**:
+   - Phân rã bài toán đa mục tiêu thành nhiều bài toán đơn mục tiêu
+   - Tối ưu hóa song song với trọng số khác nhau
+
+**Chiến lược lựa chọn từ Pareto Front:**
+
+| **Tiêu chí** | **Phương pháp lựa chọn** | **Ứng dụng** |
+|-------------|------------------------|-------------|
+| **Knee Point** | Điểm có trade-off tối ưu | Ứng dụng tổng quát |
+| **Weighted Sum** | Σ wᵢ × fᵢ(x) | Ưu tiên rõ ràng |
+| **Compromise Programming** | Khoảng cách đến ideal point | Cân bằng tất cả mục tiêu |
+| **Decision Maker Preference** | Tương tác với chuyên gia | Ứng dụng cụ thể |
+
 ---
 
 ## IV. QUẢN LÝ RỦI RO VÀ TRIỂN KHAI
@@ -279,18 +356,18 @@ graph TD
 #### 7.1 Rủi ro kỹ thuật
 ```mermaid
 graph TB
-    subgraph "Danh mục rủi ro"
-        A["Độ chính xác phát hiện khía cạnh<br/>Rủi ro cao - Tác động cao"]
-        B["Nhiễu đa khía cạnh<br/>Rủi ro trung bình - Tác động cao"]
-        C["Thách thức NLP tiếng Việt<br/>Rủi ro trung bình - Tác động trung bình"]
-        D["Sai lệch chủ đề-khía cạnh<br/>Rủi ro thấp - Tác động trung bình"]
+    subgraph "Rủi ro chính"
+        A[Độ chính xác<br/>khía cạnh thấp<br/>⚠️ Cao-Cao]
+        B[Nhiễu đa<br/>khía cạnh<br/>⚠️ TB-Cao]
+        C[Thách thức<br/>NLP tiếng Việt<br/>⚠️ TB-TB]
+        D[Sai lệch<br/>chủ đề-khía cạnh<br/>⚠️ Thấp-TB]
     end
     
-    subgraph "Chiến lược giảm thiểu"
-        E["Học đa nhiệm +<br/>Kiểm định chéo"]
-        F["Mô hình phân cấp +<br/>Cơ chế chú ý"]
-        G["Thích ứng lĩnh vực +<br/>Tinh chỉnh PhoBERT"]
-        H["Xác thực chuyên gia +<br/>Cải tiến lặp lại"]
+    subgraph "Giải pháp"
+        E[Multi-task<br/>+ Cross-validation]
+        F[Hierarchical<br/>+ Attention]
+        G[Domain adaptation<br/>+ PhoBERT tuning]
+        H[Expert validation<br/>+ Iterative improve]
     end
     
     A --> E
@@ -327,22 +404,22 @@ graph TB
 ```mermaid
 graph TD
     subgraph "Xác thực kỹ thuật"
-        A[Kiểm tra đơn vị] --> E[Kiểm tra tích hợp]
-        B[Xác thực mô hình] --> E
-        C[Kiểm tra hiệu suất] --> E
+        A[Unit Tests] --> E[Integration<br/>Testing]
+        B[Model<br/>Validation] --> E
+        C[Performance<br/>Testing] --> E
     end
     
     subgraph "Xác thực lĩnh vực"
-        D[Đánh giá chuyên gia] --> F[Kiểm tra chấp nhận người dùng]
-        G[Kiểm tra A/B] --> F
-        H[Phản hồi bên liên quan] --> F
+        D[Expert<br/>Review] --> F[User Acceptance<br/>Testing]
+        G[A/B<br/>Testing] --> F
+        H[Stakeholder<br/>Feedback] --> F
     end
     
     subgraph "Giám sát liên tục"
-        E --> I[Giám sát sản xuất]
+        E --> I[Production<br/>Monitoring]
         F --> I
-        I --> J[Cảnh báo hiệu suất]
-        J --> K[Huấn luyện lại mô hình]
+        I --> J[Performance<br/>Alerts]
+        J --> K[Model<br/>Retraining]
     end
     
     style E fill:#e8f5e8
@@ -366,14 +443,19 @@ graph TD
 #### 9.1 Chiến lược tiến hóa đa giai đoạn
 ```mermaid
 flowchart TD
-    A[Giai đoạn 1: ABSA cơ bản<br/>LDA + PhoBERT] --> B[Giai đoạn 2: ABSA nâng cao<br/>Khía cạnh phân cấp]
-    B --> C[Giai đoạn 3: Tích hợp chương trình<br/>Phân tích chương trình giảng dạy] 
-    C --> D[Giai đoạn 4: Thông tin dự đoán<br/>Dự báo chất lượng]
+    A[Giai đoạn 1<br/>ABSA cơ bản<br/>LDA + PhoBERT] --> B[Giai đoạn 2<br/>ABSA nâng cao<br/>Khía cạnh phân cấp]
     
-    A1[5 khía cạnh cốt lõi<br/>Cảm xúc cơ bản<br/>Khám phá chủ đề] --> A
-    B1[Phân tích khía cạnh phụ<br/>Cảm xúc theo ngữ cảnh<br/>Phụ thuộc khía cạnh] --> B
-    C1[Liên kết kết quả học tập<br/>Cải thiện chương trình<br/>Báo cáo tự động] --> C
-    D1[Hệ thống cảnh báo sớm<br/>Dự đoán chất lượng<br/>Khuyến nghị can thiệp] --> D
+    B --> C[Giai đoạn 3<br/>Tích hợp chương trình<br/>Phân tích giảng dạy] 
+    
+    C --> D[Giai đoạn 4<br/>Thông tin dự đoán<br/>Dự báo chất lượng]
+    
+    A1[• 5 khía cạnh cốt lõi<br/>• Cảm xúc cơ bản<br/>• Khám phá chủ đề] --> A
+    
+    B1[• Khía cạnh phụ<br/>• Cảm xúc ngữ cảnh<br/>• Phụ thuộc khía cạnh] --> B
+    
+    C1[• Liên kết học tập<br/>• Cải thiện chương trình<br/>• Báo cáo tự động] --> C
+    
+    D1[• Cảnh báo sớm<br/>• Dự đoán chất lượng<br/>• Khuyến nghị] --> D
     
     style A fill:#e8f5e8
     style B fill:#fff3e0
@@ -414,15 +496,15 @@ flowchart TD
 #### 11.1 Tóm tắt kiến trúc giải pháp
 ```mermaid
 graph TB
-    subgraph "Thiết kế giải pháp cân bằng"
-        A["Xuất sắc kỹ thuật<br/>Phân tích theo khía cạnh<br/>Tối ưu hóa NLP tiếng Việt"]
-        B["Liên quan giáo dục<br/>Chủ đề phù hợp chương trình<br/>Thông tin có thể hành động"] 
-        C["Tính khả thi triển khai<br/>Công nghệ đã chứng minh<br/>Kiến trúc có thể mở rộng"]
-        D["Khả năng mở rộng tương lai<br/>Thiết kế mô-đun<br/>Lộ trình nâng cấp"]
+    subgraph "Thiết kế cân bằng"
+        A[Xuất sắc kỹ thuật<br/>• Phân tích khía cạnh<br/>• NLP tiếng Việt]
+        B[Liên quan giáo dục<br/>• Chủ đề phù hợp<br/>• Thông tin hành động] 
+        C[Khả thi triển khai<br/>• Công nghệ chứng minh<br/>• Kiến trúc mở rộng]
+        D[Mở rộng tương lai<br/>• Thiết kế module<br/>• Lộ trình nâng cấp]
     end
     
-    subgraph "Hệ thống ABSA tích hợp"
-        E[Cảm xúc theo khía cạnh + Khám phá chủ đề]
+    subgraph "Hệ thống ABSA"
+        E[Cảm xúc theo khía cạnh<br/>+<br/>Khám phá chủ đề]
     end
     
     A --> E
@@ -430,7 +512,7 @@ graph TB
     C --> E  
     D --> E
     
-    E --> F[Trí tuệ chất lượng giáo dục]
+    E --> F[Trí tuệ chất lượng<br/>giáo dục]
     
     style A fill:#e8f5e8
     style B fill:#fff3e0
