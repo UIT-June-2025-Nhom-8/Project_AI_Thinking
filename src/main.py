@@ -8,6 +8,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.metrics import classification_report, confusion_matrix
 import matplotlib.pyplot as plt 
 import seaborn as sns
+from phoBERT_classifier import PhoBERTSentimentClassifier
 
 # {0: "NEGATIVE", 1: "NEUTRAL", 2: "POSITIVE"}
 
@@ -59,9 +60,9 @@ df_underthesea_train = prep.transform(df_train)
 df_underthesea_val = prep.transform(df_val)
 df_underthesea_test = prep.transform(df_test)
 
-# print(df_train.head())
-# print(df_val.head())
-# print(df_test.head())
+print(df_train.head())
+print(df_val.head())
+print(df_test.head())
 
 ### Nếu muốn gộp các tập dữ liệu lại và random split:
 # Gộp các tập dữ liệu lại
@@ -181,3 +182,21 @@ plt.ylabel('True Label')
 plt.title('Confusion Matrix (Underthesea Data)')
 plt.show()
 
+
+# print(splits["train"].head())
+# print(splits["val"].head())
+# print(splits["test"].head())
+
+###### PhoBERT #######
+## khởi tạo, tạo DataLoader, train
+clf = PhoBERTSentimentClassifier(batch_size=16, lr=2e-5, max_len=128)
+clf.prepare_dataloader(df_train, df_val, df_test)
+clf.train(epochs=3)
+
+metrics = clf.evaluate_on_test(return_report=True)
+print("Accuracy:", metrics["accuracy"])
+print(metrics["text_report"])       # Báo cáo dạng sklearn
+print(metrics["confusion_matrix"])  # Ma trận nhầm lẫn (numpy array)
+
+y_true = metrics["y_true"]
+y_pred_phobert = metrics["y_pred"]
