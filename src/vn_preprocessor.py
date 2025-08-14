@@ -8,8 +8,10 @@ try:
     from underthesea import word_tokenize as uts_tok
 
     _HAS_UTS = True
+    print('Underthesea installed')
 except Exception:
     _HAS_UTS = False
+    print("Underthesea is not installed. You can install it with `pip install underthesea`.")
 
 # --- regex & stopwords ---
 _URL = re.compile(r"https?://\S+|www\.\S+", re.I)

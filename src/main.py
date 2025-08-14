@@ -4,6 +4,10 @@ from vn_preprocessor import VNPreprocessor
 from datasets import load_dataset
 from LDA_classifier import LDAClassifier
 from TFIDF_vectorlizer import TFIDFVectorizer
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.metrics import classification_report, confusion_matrix
+import matplotlib.pyplot as plt 
+import seaborn as sns
 
 # {0: "NEGATIVE", 1: "NEUTRAL", 2: "POSITIVE"}
 
@@ -144,3 +148,36 @@ underthesea_accuracy = underthesea_lda_classifier.score(
 
 print(f"Độ chính xác của mô hình trên tập test không underthesea: {raw_accuracy:.2f}")
 print(f"Độ chính xác của mô hình trên tập test có underthesea: {underthesea_accuracy :.2f}")
+
+# Add analysis/plots after LDA training
+print("\n--- Analysis after LDA Training ---")
+
+sentiment_labels = ["NEGATIVE", "NEUTRAL", "POSITIVE"]
+# 4. Classification Report
+print("\nClassification Report (Raw Data):")
+raw_pred = raw_lda_classifier.predict(np.array(df_raw_test["vector"].tolist()))
+print(classification_report(raw_actual, raw_pred, target_names=sentiment_labels))
+
+print("\nClassification Report (Underthesea Data):")
+underthesea_pred = underthesea_lda_classifier.predict(np.array(df_underthesea_test["vector"].tolist()))
+print(classification_report(underthesea_actual, underthesea_pred, target_names=sentiment_labels))
+
+# 5. Confusion Matrix
+print("\nConfusion Matrix (Raw Data):")
+cm_raw = confusion_matrix(raw_actual, raw_pred)
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm_raw, annot=True, fmt='d', cmap='Blues', xticklabels=sentiment_labels, yticklabels=sentiment_labels)
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.title('Confusion Matrix (Raw Data)')
+plt.show()
+
+print("\nConfusion Matrix (Underthesea Data):")
+cm_underthesea = confusion_matrix(underthesea_actual, underthesea_pred)
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm_underthesea, annot=True, fmt='d', cmap='Blues', xticklabels=sentiment_labels, yticklabels=sentiment_labels)
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.title('Confusion Matrix (Underthesea Data)')
+plt.show()
+
