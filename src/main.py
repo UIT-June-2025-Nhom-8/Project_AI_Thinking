@@ -2,6 +2,8 @@ import pandas as pd
 from vn_preprocessor import VNPreprocessor
 from datasets import load_dataset
 
+from lda_classifier import run_linear_lda_classifier
+
 # {0: "NEGATIVE", 1: "NEUTRAL", 2: "POSITIVE"}
 
 ########################################
@@ -50,3 +52,12 @@ splits = prep.split(
 print(splits["train"].head())
 print(splits["val"].head())
 print(splits["test"].head())
+
+lda_clf, lda_results = run_linear_lda_classifier(
+        train_df=splits["train"],
+        val_df=splits["val"],
+        test_df=splits["test"],
+        text_col="sentence_clean",
+        label_col="sentiment",
+        max_features=5000
+    )
