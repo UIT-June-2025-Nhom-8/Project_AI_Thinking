@@ -171,18 +171,6 @@ Project_AI_Thinking/
 
 #### 📚 Documentation (`docs/`)
 
-### 📝 Mô Tả Chi Tiết Các Thành Phần
-
-#### 🔧 Source Code (`src/`)
-
-- **`main.py`**: Pipeline chính thực hiện so sánh LDA với và không có Underthesea
-- **`vn_preprocessor.py`**: Xử lý đặc thù tiếng Việt (Unicode, tokenization, stop words)
-- **`LDA_classifier.py`**: Implementation LDA với SVD solver
-- **`TFIDF_vectorlizer.py`**: TF-IDF vectorization với n-gram support
-- **`*.ipynb`**: Jupyter notebooks cho phân tích và demo
-
-#### 📊 Documentation (`docs/`)
-
 - **Reports**: Báo cáo chi tiết từng thành phần và tổng hợp
 - **Visualizations**: Confusion matrices, performance comparisons
 - **Theoretical Analysis**: Phân tích lý thuyết và giải pháp
